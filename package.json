@@ -1,0 +1,26 @@
+{
+  "name": "tgt",
+  "version": "0.0.1",
+  "description": "tpl generator tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": "./bin/cmd",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devWayne/tGt.git"
+  },
+  "author": "VI",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devWayne/tGt/issues"
+  },
+  "homepage": "https://github.com/devWayne/tGt#readme",
+  "dependencies": {
+    "glob": "^5.0.10",
+    "minimist": "^1.1.1",
+    "readline": "0.0.8",
+    "replace": "0.3.0"
+  }
+}
