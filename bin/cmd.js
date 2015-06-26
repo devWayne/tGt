@@ -3,8 +3,8 @@
 var inject = require('../lib/inject');
 var global = require('../lib/global');
 var git = require('../lib/git');
-var getPattern = require('../lib/pattern');
-
+var pattern = require('../lib/pattern');
+var log = require('nl-clilog');
 var readline = require('readline');
 
 var path = require('path');
@@ -37,10 +37,8 @@ if (argv.global && argv._.length > 0) {
 
 if (argv.clone) {
     var cloneName = argv.clone.match(/\/([\w-]+).git$/i)[1];
-    //var destPath = path.join(__dirname, '../tpl', cloneName);
     var destPath = path.join(argv.dir, cloneName);
-    console.log(destPath.toString());
-    console.log(destPath);
+    console.log(destPath)
     emptyDirectory(destPath, function(empty) {
         console.log(empty);
         if (empty) {
@@ -50,9 +48,9 @@ if (argv.clone) {
                     console.log(err);
                 }
                 git.cmdClone(destPath, argv.clone);
-		pattern(destPath,function(pdata){
-			inject(destPath,pdata);
-		});
+		pattern.getPattern(path.join(destPath, '/**/*')).then(pattern.setPattern).then(function(pdata) {
+                    inject(destPath, pdata);
+                });
             })
         } else {
             confirm('destination is not empty, continue? [y/N] ', function(ok) {
@@ -65,28 +63,6 @@ if (argv.clone) {
                 }
             });
         }
-    });
-}
-
-function pattern(_path,cb) {
-    getPattern(path.join(_path,'/**/*'), function(patternList) {
-        console.log(patternList);
-        var patternData = {};
-        if (patternList.length == 0) process.exit(1);
-        read('input ' + (function(_array) {
-            var str = '';
-            _array.forEach(function(v, idx) {
-                str = str + v + ' ';
-            });
-            return str;
-        })(patternList) + ' :', function(readVal) {
-            var readValList = readVal.split(' ');
-            patternList.forEach(function(v, idx) {
-                patternData[v] = readValList[idx];
-            });
-            console.log(patternData);
-	    cb(patternData);
-        });
     });
 }
 
@@ -111,14 +87,4 @@ function confirm(msg, callback) {
     });
 }
 
-function read(msg, callback) {
-    var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
 
-    rl.question(msg, function(input) {
-        rl.close();
-        callback(input);
-    });
-}
