@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-var inject = require('../lib/inject');
+var replace = require('../lib/replace');
 var global = require('../lib/global');
-var git = require('../lib/git');
+var execgit = require('../lib/execgit');
 var pattern = require('../lib/pattern');
+var utils = require('../lib/utils');
+
 var log = require('nl-clilog');
 var readline = require('readline');
-
 var path = require('path');
 var fs = require('fs');
 
@@ -39,24 +40,17 @@ if (argv.clone) {
     var cloneName = argv.clone.match(/\/([\w-]+).git$/i)[1];
     var destPath = path.join(argv.dir, cloneName);
     console.log(destPath)
-    emptyDirectory(destPath, function(empty) {
+    utils.emptyDirectory(destPath, function(empty) {
         console.log(empty);
         if (empty) {
-            fs.mkdir(destPath, function(err) {
-                console.log('mkdir :' + destPath);
-                if (err) {
-                    console.log(err);
-                }
-                git.cmdClone(destPath, argv.clone);
-		pattern.getPattern(path.join(destPath, '/**/*')).then(pattern.setPattern).then(function(pdata) {
-                    inject(destPath, pdata);
-                });
-            })
+            generator(destPath);
         } else {
-            confirm('destination is not empty, continue? [y/N] ', function(ok) {
+            utils.confirm('destination is not empty, continue? [y/N] ', function(ok) {
                 if (ok) {
-                    process.stdin.destroy();
-                    createApplication(appName, destinationPath);
+                    //process.stdin.destroy();
+                    utils.deleteFolderRecursive(destPath);
+		    console.log('delete folder success');
+                    generator(destPath);
                 } else {
                     console.error('aborting');
                     process.exit(1);
@@ -67,24 +61,15 @@ if (argv.clone) {
 }
 
 
-function emptyDirectory(path, fn) {
-    fs.readdir(path, function(err, files) {
-        if (err && 'ENOENT' != err.code) throw err;
-        fn(!files || !files.length);
+function generator(destPath) {
+    fs.mkdir(destPath, function(err) {
+        console.log('mkdir :' + destPath);
+        if (err) {
+            console.log(err);
+        }
+        execgit.cmdClone(destPath, argv.clone);
+        pattern.getPattern(path.join(destPath, '/**/*')).then(pattern.setPattern).then(function(pdata) {
+            replace(destPath, pdata);
+        });
     });
 }
-
-
-function confirm(msg, callback) {
-    var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    rl.question(msg, function(input) {
-        rl.close();
-        callback(/^y|yes|ok|true$/i.test(input));
-    });
-}
-
-
