@@ -33,11 +33,26 @@ if (argv.help) {
 
 if (argv.global && argv._.length > 0) {
     //console.log(argv);
-    global.G(argv.global, argv._[0]);
+    global.gVar(argv.global, argv._[0]);
+    return;
+}else if(argv.global){
+    console.log(global.gVar(argv.global));
+    return;
 }
 
-if (argv.clone) {
-    var cloneName = argv.clone.match(/\/([\w-]+).git$/i)[1];
+if (argv.tpl && argv._.length > 0) {
+    //console.log(argv);
+    global.gTpl(argv.global, argv._[0]);
+    return;
+}else if(argv.global){
+    console.log(global.gTpl(argv.global));
+    return;
+}
+
+
+if (argv._.length == 2) {
+    //var cloneName = argv.clone.match(/\/([\w-]+).git$/i)[1];
+    var cloneName = argv._[0];
     var destPath = path.join(argv.dir, cloneName);
     console.log(destPath)
     utils.emptyDirectory(destPath, function(empty) {
@@ -67,7 +82,7 @@ function generator(destPath) {
         if (err) {
             console.log(err);
         }
-        execgit.cmdClone(destPath, argv.clone);
+        execgit.cmdClone(destPath, argv._[1]);
         pattern.getPattern(path.join(destPath, '/**/*')).then(pattern.setPattern).then(function(pdata) {
             replace(destPath, pdata);
         });

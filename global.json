@@ -1,1 +1,8 @@
-{"username":"exampleName","useremail":"example@mail.com","a":"bcc"}
+{
+    "gvar":{
+        "username": "exampleName",
+        "useremail": "example@mail.com",
+        "a": "bcc"
+    },
+    "gtpl":{}
+}
